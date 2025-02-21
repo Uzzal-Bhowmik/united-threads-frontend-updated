@@ -30,7 +30,6 @@ export default function UpdatePassForm() {
 
   const onUpdatePassSubmit = async (data) => {
     const payload = { password: data.newPassword };
-    console.log(payload);
 
     try {
       const res = await updatePassword(payload).unwrap();

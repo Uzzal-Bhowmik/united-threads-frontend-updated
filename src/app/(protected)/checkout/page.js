@@ -1,12 +1,4 @@
 import CommonPageHeader from "@/components/CommonPageHeader/CommonPageHeader";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import Stepper from "./_components/Stepper";
 
 export const metadata = {

@@ -22,15 +22,12 @@ export default function MessageCard({ message, userId, previousMessage }) {
         <div className="flex flex-col items-end">
           <div>
             <p className="text-muted-foreground text-end text-sm">{sentTime}</p>
-            {/* {isDifferentSender && (
-            )} */}
+
             <OwnerMsgCard message={message} />
           </div>
         </div>
       ) : (
         <div className="flex flex-col items-start">
-          {/* {isDifferentSender && (
-          )} */}
           <p className="text-muted-foreground ml-12 text-sm">{sentTime}</p>
           <ReceiverMsgCard
             message={message}

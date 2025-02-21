@@ -47,11 +47,11 @@ export default function TestimonialsSlider() {
           duration: 55,
         }}
       >
-        <CarouselContent className="-ml-6 px-1 py-5">
+        <CarouselContent className="-ml-6 py-5 lg:px-1">
           {reviews?.map((review) => (
             <CarouselItem
               key={review._id}
-              className="h-max basis-1/2 pl-6 md:basis-1/2 lg:basis-1/3"
+              className="basis-1/1 h-max pl-6 md:basis-1/2 lg:basis-1/3"
             >
               <div className="min-h-[200px] space-y-6 rounded-xl border border-gray-200 p-6 shadow-md">
                 <div className="flex-center-start gap-x-4">

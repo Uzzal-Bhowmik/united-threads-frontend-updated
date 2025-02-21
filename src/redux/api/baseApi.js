@@ -8,6 +8,7 @@ const baseQuery = fetchBaseQuery({
   // baseUrl: "http://167.172.237.31:5000/api/v1",
   baseUrl: getBackendBaseUrl(),
   credentials: "include",
+
   prepareHeaders: (headers, { getState }) => {
     const signUpToken = getFromSessionStorage("signUpToken");
     const forgotPassToken = getFromSessionStorage("forgotPassToken");

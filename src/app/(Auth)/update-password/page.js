@@ -1,6 +1,7 @@
 import Image from "next/image";
 import updatePassGraphic from "/public/images/update password/Group 14582640.png";
 import UpdatePassForm from "./_components/UpdatePassForm";
+import { CustomImageWithBlur } from "@/components/CustomImageWithBlur/CustomImageWithBlur";
 
 export const metadata = {
   title: "Update Password",
@@ -11,10 +12,10 @@ export default function UpdatePasswordPage() {
   return (
     <div className="flex-center w-full gap-x-20 rounded-xl border border-gray-200 p-10 shadow-[0px_0px_2px_lightGray]">
       <div className="w-full lg:w-1/2">
-        <Image
+        <CustomImageWithBlur
           src={updatePassGraphic}
-          alt="update password graphic"
-          className="mx-auto block"
+          alt="Update Password Graphic"
+          className="mx-auto block lg:w-3/4"
         />
       </div>
 

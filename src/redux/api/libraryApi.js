@@ -5,7 +5,7 @@ const libraryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getLibrary: builder.query({
       query: () => ({
-        url: "/library/libraries",
+        url: "/library/libraries?limit=999999",
         method: "GET",
       }),
 

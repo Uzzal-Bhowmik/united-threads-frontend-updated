@@ -1,13 +1,12 @@
 import Image from "next/image";
 import footerBg from "/public/images/footer/flowers.png";
 import logo from "/public/images/footer/logo-black.png";
-import sparkTechLogo from "/public/images/footer/sparktech.png";
-import { Button } from "@/components/ui/button";
 import { Facebook } from "lucide-react";
 import Link from "next/link";
 import { Instagram } from "lucide-react";
-import { Twitter } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Mail } from "lucide-react";
+import { LinkedinSvg, TwitterSvg } from "@/utils/svgContainer";
 
 export default function Footer() {
   return (
@@ -16,12 +15,12 @@ export default function Footer() {
       <Image
         src={footerBg}
         alt="footer background effect"
-        className="absolute inset-0 -z-10"
+        className="absolute inset-0 -z-10 h-full opacity-45 lg:h-auto lg:opacity-100"
       />
 
       {/* Footer container */}
-      <div className="mx-auto lg:w-3/4 lg:gap-x-12">
-        <div className="flex-center-between">
+      <div className="mx-auto px-5 md:px-10 lg:w-3/4 lg:gap-x-12 lg:px-0">
+        <div className="flex flex-col items-start justify-between gap-y-8 lg:flex-row lg:items-center lg:gap-y-0">
           {/* Left */}
           <div className="space-y-8 pr-12 lg:w-1/2">
             <Image src={logo} alt="Logo" />
@@ -37,22 +36,19 @@ export default function Footer() {
           {/* Center */}
           <div className="space-y-6 lg:w-[30%]">
             <h5 className="text-lg font-semibold">
-              Subscribe to stay tuned for latest updates. Let&apos;s do it!
+              Email us about your queries. <br />
+              We&apos;ll get back to you!
             </h5>
 
             <div className="flex-center-start gap-x-2">
               <p className="flex rounded-lg bg-primary-black p-3 text-center text-sm text-primary-white">
-                hello@theunitedthreads.com
+                <Mail size={18} className="mr-2" /> hello@theunitedthreads.com
               </p>
-
-              <Button className="rounded-lg border bg-primary-white px-5 py-[21px] text-primary-black hover:bg-primary-white">
-                Email Us
-              </Button>
             </div>
           </div>
 
           {/* Right */}
-          <div className="flex flex-col items-end gap-y-6 text-end lg:w-[20%]">
+          <div className="flex flex-col gap-y-6 lg:w-[20%] lg:items-end lg:text-end">
             <div>
               <h4 className="text-lg font-bold">Follow Us</h4>
 
@@ -61,7 +57,14 @@ export default function Footer() {
                   href="#"
                   className="rounded-full bg-primary-black p-[6px] text-primary-white"
                 >
-                  <Facebook size={18} />
+                  <TwitterSvg size={18} />
+                </Link>
+
+                <Link
+                  href="#"
+                  className="rounded-full bg-primary-black p-[6px] text-primary-white"
+                >
+                  <LinkedinSvg />
                 </Link>
 
                 <Link
@@ -75,39 +78,36 @@ export default function Footer() {
                   href="#"
                   className="rounded-full bg-primary-black p-[6px] text-primary-white"
                 >
-                  <Twitter size={18} />
+                  <Facebook size={18} />
                 </Link>
               </div>
             </div>
 
             <div>
               <h4 className="text-lg font-bold">Call Us</h4>
-              <p className="mt-2 font-medium">+1 470 286 4400</p>
+              <p className="mt-2 font-medium">+1 (470) 286-4400</p>
             </div>
           </div>
         </div>
 
         <Separator
           orientation="horizontal"
-          className="mb-2 mt-8 bg-primary-black"
+          className="mb-8 mt-8 bg-primary-black lg:mb-2"
         />
 
-        <div className="flex items-center justify-between text-primary-black">
+        <div className="flex flex-col items-center justify-between gap-y-4 text-primary-black lg:flex-row lg:gap-y-0">
           {/* left */}
-          <div className="flex items-center gap-x-3">
-            <Image src={sparkTechLogo} alt="sparkTech logo" />
-            <p className="text-sm text-primary-black/80">
-              Design & Developed by Sparktech Agency
-            </p>
+          <div className="text-center font-medium">
+            <p>&copy; 2024 UnitedThreads. All rights reserved</p>
           </div>
 
           {/* right */}
           <div className="flex items-center gap-x-5">
-            <Link href="/privacy-policy" className="text-lg">
+            <Link href="/privacy-policy" className="font-medium">
               Privacy Policy
             </Link>
-            <Link href="/terms-conditions" className="text-lg">
-              Terms of Service
+            <Link href="/terms-conditions" className="font-medium">
+              Terms and Conditions
             </Link>
           </div>
         </div>

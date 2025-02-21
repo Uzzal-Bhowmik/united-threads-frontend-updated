@@ -1,24 +1,20 @@
 import Image from "next/image";
-import uploadedDesign from "/public/images/order-history/Group 47486.png";
 import { Button } from "@/components/ui/button";
 import ModalWrapper from "@/components/shared/ModalWrapper/ModalWrapper";
-import AnimatedArrow from "@/components/AnimatedArrow/AnimatedArrow";
-import Link from "next/link";
 import { Tag } from "antd";
 import { Badge } from "@/components/ui/badge";
 import { useAcceptQuoteByCustomerMutation } from "@/redux/api/quoteApi";
-import { useCreatePaymentMutation } from "@/redux/api/paymentApi";
 import { errorToast, successToast } from "@/utils/customToast";
 import { Loader } from "lucide-react";
+import pantoneToHex from "@/utils/pantoneToHex";
+import { useRouter } from "next/navigation";
 
 export default function QuoteApprovedModal({ open, setOpen, quote }) {
+  const router = useRouter();
+
   // ================ Accept quote api handler ===================
   const [acceptQuote, { isLoading: isAccepting }] =
     useAcceptQuoteByCustomerMutation();
-
-  // ============== Payment api handler =================
-  const [createPaymentLink, { isLoading: isCreatingPayment }] =
-    useCreatePaymentMutation();
 
   const handleAcceptQuote = async () => {
     try {
@@ -26,21 +22,11 @@ export default function QuoteApprovedModal({ open, setOpen, quote }) {
 
       if (acceptQuoteRes?.success) {
         // Accepted quote becomes an Order
-        // so, proceed to pay for the order
+        // so, proceed to order/shopping history page
 
-        handlePaymentForQuote(acceptQuoteRes?.data[0]?._id);
+        successToast("Quote accepted");
+        router.push("/user/shop-history");
       }
-    } catch (error) {
-      errorToast(error?.data?.message || error?.error);
-    }
-  };
-
-  const handlePaymentForQuote = async (orderId) => {
-    try {
-      const createPaymentRes = await createPaymentLink(orderId).unwrap();
-
-      successToast("Proceed to payment....");
-      window.location.href = createPaymentRes?.data?.paymentLink;
     } catch (error) {
       errorToast(error?.data?.message || error?.error);
     }
@@ -49,26 +35,27 @@ export default function QuoteApprovedModal({ open, setOpen, quote }) {
   return (
     <ModalWrapper open={open} setOpen={setOpen}>
       <div className="mb-10">
-        <div className="flex-center gap-x-5">
-          <div>
+        <div className="flex flex-col items-center gap-x-5 gap-y-5 lg:flex-row">
+          <div className="h-[320px] lg:w-1/2">
             <Image
               src={quote?.frontSide}
               alt="user uploaded front design"
               height={1200}
               width={1200}
-              className="mx-auto block rounded-lg border border-primary-black/50 p-2"
+              className="mx-auto block h-full w-auto rounded-lg border border-primary-black/50 p-2"
             />
             <h3 className="text-center font-medium text-green-500/75">
               Front Design
             </h3>
           </div>
-          <div>
+
+          <div className="h-[320px] lg:w-1/2">
             <Image
               src={quote?.backSide}
               alt="user uploaded back design"
               height={1200}
               width={1200}
-              className="mx-auto block rounded-lg border border-primary-black/50 p-2"
+              className="mx-auto block h-full w-auto rounded-lg border border-primary-black/50 p-2"
             />
             <h3 className="text-center font-medium text-green-500/75">
               Back Design
@@ -91,38 +78,38 @@ export default function QuoteApprovedModal({ open, setOpen, quote }) {
         </div>
 
         <div>
-          <h4 className="mb-1 text-lg font-medium">Approved Size</h4>
-          <h5 className="text-lg font-extrabold text-black">
-            <Tag color="magenta">{quote?.size}</Tag>
-          </h5>
+          <h4 className="mb-1 text-lg font-medium">Approved Size & Quantity</h4>
+
+          <div className="flex flex-row flex-wrap gap-2">
+            {quote?.sizesAndQuantities?.map((item) => (
+              <Tag
+                color="geekblue"
+                key={item._id}
+                className="!text-sm !font-semibold"
+              >
+                {item.size} - {item.quantity}pcs
+              </Tag>
+            ))}
+          </div>
         </div>
 
         <div>
           <h4 className="mb-1 text-lg font-medium">Pantone Color</h4>
-          <h5 className="flex-center-start gap-x-2 text-lg font-extrabold text-black">
+          <h5 className="flex items-center justify-center gap-x-2 text-lg font-extrabold text-black lg:justify-start">
             <div
               className="h-5 w-5 rounded-full"
               style={{
-                backgroundColor: quote?.hexColor?.includes("#")
-                  ? quote?.hexColor
-                  : `#${quote?.hexColor}`,
+                backgroundColor: pantoneToHex(quote?.pantoneColor),
               }}
             />
             <p>{quote?.pantoneColor}</p>
-          </h5>
-        </div>
-
-        <div>
-          <h4 className="mb-1 text-lg font-medium">Approved Quantity</h4>
-          <h5 className="text-lg font-extrabold text-black">
-            <Tag color="geekblue">{quote?.quantity}pcs</Tag>
           </h5>
         </div>
       </div>
 
       <div>
         <h4 className="mb-1 text-lg font-medium">Material Preferences</h4>
-        <h5 className="rounded-lg bg-slate-100 p-2 text-lg font-extrabold text-black">
+        <h5 className="break-all rounded-lg bg-slate-100 p-2 text-lg font-extrabold text-black">
           {quote?.materialPreferences}
         </h5>
       </div>
@@ -142,7 +129,7 @@ export default function QuoteApprovedModal({ open, setOpen, quote }) {
           variant="success"
           className="rounded-full py-1 text-base font-bold"
         >
-          ${Number(quote?.quantity * quote?.price)?.toFixed(2)}
+          ${Number(quote?.price)?.toFixed(2)}
         </Badge>
       </div>
 
@@ -154,9 +141,7 @@ export default function QuoteApprovedModal({ open, setOpen, quote }) {
         {isAccepting ? (
           <Loader size={26} className="animate-spin" />
         ) : (
-          <>
-            Accept & Proceed to Payment <AnimatedArrow />
-          </>
+          <>Accept Quote</>
         )}
       </Button>
     </ModalWrapper>

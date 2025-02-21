@@ -94,8 +94,6 @@ export default function ProfileContainer() {
 
   return (
     <div className="lg:mx-auto lg:w-[60%]">
-      {/* Whole page overlay loader */}
-
       {isDeleting && (
         <div>
           <div
@@ -117,7 +115,7 @@ export default function ProfileContainer() {
             <div>
               {profilePicUrl ? (
                 <div>
-                  <Avatar className="border-primary-orange h-[90px] w-[90px] border">
+                  <Avatar className="h-[70px] w-[70px] lg:h-[80px] lg:w-[80px] 2xl:h-[90px] 2xl:w-[90px]">
                     <AvatarImage src={profilePicUrl} />
                   </Avatar>
 
@@ -135,11 +133,11 @@ export default function ProfileContainer() {
                   </button>
                 </div>
               ) : user?.profilePicture ? (
-                <Avatar className="h-[90px] w-[90px] border border-primary-black">
+                <Avatar className="h-[70px] w-[70px] border border-primary-black lg:h-[80px] lg:w-[80px] 2xl:h-[90px] 2xl:w-[90px]">
                   <AvatarImage src={user?.profilePicture} />
                 </Avatar>
               ) : (
-                <div className="text-foundation-orange-normal flex h-[90px] w-[90px] items-center justify-center rounded-full bg-gray-800 text-2xl font-bold uppercase">
+                <div className="text-foundation-orange-normal flex h-[70px] w-[70px] items-center justify-center rounded-full bg-gray-800 text-2xl font-bold uppercase text-white lg:h-[80px] lg:w-[80px] 2xl:h-[90px] 2xl:w-[90px]">
                   <p>
                     {transformNameInitials("", user?.firstName, user?.lastName)}
                   </p>
@@ -184,7 +182,7 @@ export default function ProfileContainer() {
             </div>
           </div>
 
-          <h4 className="text-2xl font-semibold">
+          <h4 className="text-xl font-semibold md:text-2xl">
             {user?.firstName} {user?.lastName}
           </h4>
         </div>
@@ -194,7 +192,8 @@ export default function ProfileContainer() {
           className="rounded-full"
           onClick={handleDeleteAccount}
         >
-          <Trash2 size={16} className="mr-2" /> Delete Account
+          <Trash2 size={16} className="md:mr-2" />{" "}
+          <span className="hidden md:block">Delete Account</span>
         </Button>
       </div>
 

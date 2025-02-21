@@ -1,10 +1,11 @@
+import { getBackendBaseUrl } from "@/config/envConfig";
 import ProductDetailsContainer from "./_components/ProductDetailsContainer";
 
 export async function generateMetadata({ params }) {
   const { id } = params;
 
   const res = await fetch(
-    `http://192.168.10.188:8004/api/v1/product/single-product/${id}`,
+    `${getBackendBaseUrl()}/product/single-product/${id}`,
   ).then((res) => res.json());
 
   return {

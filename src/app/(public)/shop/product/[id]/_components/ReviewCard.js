@@ -21,7 +21,6 @@ import { toast } from "sonner";
 // };
 
 export default function ReviewCard({ review }) {
-  console.log("review:", review);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const userId = null;
 

@@ -34,7 +34,7 @@ export const SocketProvider = ({ children }) => {
       });
 
       socketStore.on("connect", () => {
-        successToast("Connected to server");
+        // successToast("Connected to server");
         setSocketLoading(false);
       });
 

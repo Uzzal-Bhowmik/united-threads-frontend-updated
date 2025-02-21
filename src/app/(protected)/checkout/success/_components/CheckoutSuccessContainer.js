@@ -11,11 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { ErrorModal } from "@/utils/customModal";
 import { useGetSingleOrderQuery } from "@/redux/api/orderApi";
+import * as NProgress from "nprogress";
 
 export default function CheckoutSuccessContainer() {
   const orderId = useSearchParams().get("orderId");
   const router = useRouter();
-  const [giveAccess, setGiveAccess] = useState("idle");
 
   // ================= Get Order details =================
   const { data: order, isLoading } = useGetSingleOrderQuery(orderId, {
@@ -88,7 +88,10 @@ export default function CheckoutSuccessContainer() {
             <Button
               size="lg"
               className="primary-button group rounded-full"
-              onClick={() => router.push(`/user/shop-history/${orderId}`)}
+              onClick={() => {
+                NProgress.start();
+                router.push(`/user/shop-history/${orderId}`);
+              }}
             >
               See Order Details <AnimatedArrow />
             </Button>

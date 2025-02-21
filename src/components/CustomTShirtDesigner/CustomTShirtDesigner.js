@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -16,9 +17,10 @@ import Image from "next/image";
 import { Save } from "lucide-react";
 import Swal from "sweetalert2";
 import { toast } from "sonner";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import { Input as AntInput } from "antd";
 import { Textarea } from "../ui/textarea";
 import AnimatedArrow from "../AnimatedArrow/AnimatedArrow";
 import { Image as AntImage } from "antd";
@@ -33,17 +35,13 @@ import {
   setToSessionStorage,
 } from "@/utils/sessionStorage";
 import { useGetSingleQuoteProductQuery } from "@/redux/api/Products Page Api/quoteProductsApi";
-import { useParams } from "next/navigation";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
+import { useParams, useRouter } from "next/navigation";
 import CountryStateCitySelector from "../CountryStateCitySelector/CountryStateCitySelector";
 import { ErrorModal } from "@/utils/customModal";
 import { errorToast, successToast } from "@/utils/customToast";
 import { useCreateQuoteMutation } from "@/redux/api/quoteApi";
 import { Sparkles } from "lucide-react";
 import { Images } from "lucide-react";
-
-import { X } from "lucide-react";
 import { Tag } from "antd";
 import { SendHorizontal } from "lucide-react";
 import { useGetLibraryQuery } from "@/redux/api/libraryApi";
@@ -55,6 +53,16 @@ import { Trash } from "lucide-react";
 import fileDownload from "js-file-download";
 import axios from "axios";
 import EmptyContainer from "../EmptyContainer/EmptyContainer";
+import { X } from "lucide-react";
+import { useGetProfileQuery } from "@/redux/api/userApi";
+import pantoneToHex from "@/utils/pantoneToHex";
+import { useOnClickOutside } from "usehooks-ts";
+import { useMediaQuery } from "usehooks-ts";
+import { Edit } from "lucide-react";
+import { PlusCircle } from "lucide-react";
+import { ConfigProvider } from "antd";
+import SizeSelectComponent from "./_components/SizeSelectComponent";
+import { sizeSorter } from "@/utils/sizeSorter";
 
 // Motion variants
 const fadeVariants = {
@@ -75,33 +83,36 @@ const fadeVariants = {
   },
 };
 
+const colorInputStyle = {
+  width: 64,
+  height: 22,
+  marginInlineEnd: 8,
+  verticalAlign: "top",
+};
+
 export default function CustomTShirtDesigner() {
   const {
     register,
     handleSubmit,
     formState: { errors },
     control,
-    reset,
     setValue,
   } = useForm();
 
-  const [showAiGenerateBox, setShowAiGenerateBox] = useState(false);
   const [aiGeneratedImageLink, setAiGeneratedImage] = useState("");
-  const [showLibraryBox, setShowLibraryBox] = useState(false);
+
   const [showSteps, setShowSteps] = useState(true);
+  const [showLeftToolBox, setShowLeftToolBox] = useState(false);
   const canvasRef = useRef(null);
   const [canvas, setCanvas] = useState(null);
   const [activeObject, setActiveObject] = useState(null);
-  const [overlayColor, setOverlayColor] = useState("#000000");
-  const [pantoneColorObject, setPantoneColorObject] = useState({
-    pantone: "419C",
-    hex: "000000",
-    distance: "16",
-  });
+  const [overlayColor, setOverlayColor] = useState("419C");
+  const [pantoneColorObject, setPantoneColorObject] = useState({});
   const [sizeCollapsed, setSizeCollapsed] = useState(false);
   const [colorCollapsed, setColorCollapsed] = useState(false);
   const [pantoneColorCollapsed, setPantoneColorCollapsed] = useState(false);
   const productId = useParams()?.id;
+  const router = useRouter();
 
   // ========= Currently active image side based on product data response ============
   const [activeImageSide, setActiveImageSide] = useState("front");
@@ -110,16 +121,25 @@ export default function CustomTShirtDesigner() {
   const [frontImageFile, setFrontImageFile] = useState("");
   const [savedBackImageUrl, setSavedBackImageUrl] = useState("");
   const [backImageFile, setBackImageFile] = useState("");
+
+  const aiGenerateBoxRef = useRef(null);
+  const [showAiGenerateBox, setShowAiGenerateBox] = useState(false);
   const aiPromptRef = useRef(null);
+
+  const libraryBoxRef = useRef(null);
+  const [showLibraryBox, setShowLibraryBox] = useState(false);
+
+  // Make Generate With Ai and Library box invisible on outside click
+  useOnClickOutside(aiGenerateBoxRef, () => setShowAiGenerateBox(false));
+  useOnClickOutside(libraryBoxRef, () => setShowLibraryBox(false));
 
   // =============== Send quote api handler =============
   const [createQuote, { isLoading: isQuoteLoading }] = useCreateQuoteMutation();
 
   // ================= Get Library api handler =========================
-  const { data: libraryRes, isLoading: libraryLoading } = useGetLibraryQuery({
-    size: 999999,
-  });
-  const library = libraryRes?.data?.libraries || [];
+  const { data: libraryRes, isLoading: libraryLoading } = useGetLibraryQuery();
+
+  const library = libraryRes?.data || [];
 
   // ================= Get product api handler ======================
   const { data: productDataRes, isLoading: isProductLoading } =
@@ -130,6 +150,27 @@ export default function CustomTShirtDesigner() {
     }
     return {};
   }, [productDataRes]);
+
+  // ================= Get user profile data ======================
+  const { data: userProfileRes, refetch: promptRefetch } = useGetProfileQuery();
+  const promptCount = userProfileRes?.data?.promptCount || 0;
+
+  // Show warning prompt when using mobile devices
+  const isSmallDevice = useMediaQuery("(max-width: 550px)");
+  const isTabletDevice = useMediaQuery(
+    "only screen and (min-width : 551px) and (max-width : 992px)",
+  );
+  const isLargeDevice = useMediaQuery(
+    "(min-width: 993px) and (max-width: 1440px)",
+  );
+
+  useEffect(() => {
+    if (isSmallDevice) {
+      alert(
+        "This page is not optimized for mobile devices. We highly recommend using a computer or a laptop for better accessibility. If at all you still need to use it with mobile phone, please enable desktop mode in your browser. Thank you",
+      );
+    }
+  }, [isSmallDevice]);
 
   // Initialize active image on canvas
   useEffect(() => {
@@ -145,8 +186,14 @@ export default function CustomTShirtDesigner() {
   // Initialize the Fabric.js canvas on mount
   useEffect(() => {
     const canvasInstance = new fabric.Canvas(canvasRef.current, {
-      width: 500,
-      height: 500,
+      width: isSmallDevice
+        ? 400
+        : isTabletDevice
+          ? 800
+          : isLargeDevice
+            ? 470
+            : 520,
+      height: isSmallDevice ? 300 : 520,
       selection: true,
     });
 
@@ -168,60 +215,127 @@ export default function CustomTShirtDesigner() {
     return () => {
       canvasInstance.dispose();
     };
-  }, [activeImage]);
+  }, [activeImage, isSmallDevice, isTabletDevice]);
 
   // ======== Handle changing the image side on button click ==========
   const handleChangeImageSide = async (whichSide) => {
     Swal.fire({
-      title: "Save Changes?",
-      text: "Save this before editing the other part or the progress will be lost!",
+      title: "Saved Your Changes?",
+      text: "Have you saved your changes? If not, please save them before switching sides. Otherwise, they will be lost.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Save",
-      cancelButtonText: "Already Saved",
+      confirmButtonText: "Yes, I saved it",
+      cancelButtonText: "Close",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        try {
-          await handleExportImageOnSave();
-        } catch (error) {
-          console.error(error);
-        }
+        // try {
+        //   await handleExportImageOnSave();
+        // } catch (error) {
+        //   console.error(error);
+        // }
 
         if (activeImageSide !== whichSide) {
           setActiveImageSide(activeImageSide === "front" ? "back" : "front");
         }
       } else {
-        if (activeImageSide !== whichSide) {
-          setActiveImageSide(activeImageSide === "front" ? "back" : "front");
-        }
+        // do nothing
       }
     });
   };
 
   // ============= Function to change apparel color ==============
-  const handleColorChange = (e) => {
-    if (typeof e === "string") {
-      setOverlayColor(e);
-      return;
-    }
+  const handleColorChange = (pantoneCode) => {
+    setOverlayColor(pantoneCode);
 
-    if (e.target.value) {
-      const pantoneColor = new simpleColorConverter({
-        hex6: e.target.value,
-        to: "pantone",
+    // if (typeof e === "string") {
+    //   setOverlayColor(e);
+    //   return;
+    // }
+
+    // if (e.target.value) {
+    //   const pantoneColor = new simpleColorConverter({
+    //     hex6: e.target.value,
+    //     to: "pantone",
+    //   });
+
+    //   if (pantoneColor) {
+    //     const pantoneToHex = new simpleColorConverter({
+    //       pantone: `pantone ${pantoneColor?.color}`,
+    //       to: "hex6",
+    //     });
+
+    //     setOverlayColor(`#${pantoneToHex?.color}`);
+    //   }
+    // }
+  };
+
+  // Transform hex to pantone color code
+  // useEffect(() => {
+  //   // Works if overlayColor is hex
+  //   if (overlayColor) {
+  //     const pantoneColor = new simpleColorConverter({
+  //       hex6: overlayColor,
+  //       to: "pantone",
+  //     });
+
+  //     if (pantoneColor) {
+  //       const pantoneToHex = new simpleColorConverter({
+  //         pantone: `pantone ${pantoneColor?.color}`,
+  //         to: "hex6",
+  //       });
+
+  //       // Pantone color distances are 16, 32, 48, 64, 80, 96
+  //       const distances = [16, 32, 48, 64, 80, 96];
+  //       const selectedDistanceIndex = Math.floor(Math.random() * 6);
+
+  //       setPantoneColorObject({
+  //         pantone: pantoneColor?.color,
+  //         hex: pantoneToHex?.color,
+  //         distance: distances[selectedDistanceIndex],
+  //       });
+  //     }
+  //   }
+  // }, [overlayColor]);
+
+  // Transform pantone to hex
+  useEffect(() => {
+    // Works if overlay color is in pantone code
+    if (overlayColor) {
+      const pantoneToHex = new simpleColorConverter({
+        pantone: `pantone ${overlayColor}`,
+        to: "hex6",
       });
 
-      if (pantoneColor) {
-        const pantoneToHex = new simpleColorConverter({
-          pantone: `pantone ${pantoneColor?.color}`,
-          to: "hex6",
-        });
-
-        setOverlayColor(`#${pantoneToHex?.color}`);
-      }
+      setPantoneColorObject({
+        pantone: overlayColor,
+        hex: pantoneToHex?.color,
+      });
     }
+  }, [overlayColor]);
+
+  // Handle color input
+  const [addColorInputVisible, setAddColorInputVisible] = useState(false);
+  const addColorInputRef = useRef(null);
+
+  useEffect(() => {
+    if (addColorInputVisible) {
+      addColorInputRef.current?.focus();
+    }
+  }, [addColorInputVisible]);
+
+  const handleClose = () => {
+    setOverlayColor(false);
+    setAddColorInputVisible(false);
+  };
+
+  const handleAddColor = (e) => {
+    setOverlayColor(e.target.value);
+  };
+
+  const handleColorConfirmOnEnter = () => {
+    setAddColorInputVisible(false);
   };
 
   // =============== Function to add text on apparel =================
@@ -270,8 +384,8 @@ export default function CustomTShirtDesigner() {
       imgObj.src = event.target.result;
       imgObj.onload = () => {
         const img = new fabric.Image(imgObj);
-        img.scaleToHeight(300);
-        img.scaleToWidth(300);
+        img.scaleToHeight(isSmallDevice ? 100 : 300);
+        img.scaleToWidth(isSmallDevice ? 100 : 300);
         canvas.centerObject(img);
         canvas.add(img);
         canvas.setActiveObject(img);
@@ -284,33 +398,6 @@ export default function CustomTShirtDesigner() {
       reader.readAsDataURL(e.target.files[0]);
     }
   };
-
-  // Transform hex to pantone color code
-  useEffect(() => {
-    if (overlayColor) {
-      const pantoneColor = new simpleColorConverter({
-        hex6: overlayColor,
-        to: "pantone",
-      });
-
-      if (pantoneColor) {
-        const pantoneToHex = new simpleColorConverter({
-          pantone: `pantone ${pantoneColor?.color}`,
-          to: "hex6",
-        });
-
-        // Pantone color distances are 16, 32, 48, 64, 80, 96
-        const distances = [16, 32, 48, 64, 80, 96];
-        const selectedDistanceIndex = Math.floor(Math.random() * 6);
-
-        setPantoneColorObject({
-          pantone: pantoneColor?.color,
-          hex: pantoneToHex?.color,
-          distance: distances[selectedDistanceIndex],
-        });
-      }
-    }
-  }, [overlayColor]);
 
   // ================== Ant design steps =========================
   const textBtnRef = useRef(null);
@@ -345,11 +432,11 @@ export default function CustomTShirtDesigner() {
         "Click upload button to upload logo or image for your design.",
       target: () => uploadBtnRef?.current,
     },
-    {
-      title: "Add color",
-      description: "Click color button to add color to your design.",
-      target: () => colorBtnRef?.current,
-    },
+    // {
+    //   title: "Add color",
+    //   description: "Click color button to add color to your design.",
+    //   target: () => colorBtnRef?.current,
+    // },
     {
       title: "Generate with AI",
       description:
@@ -405,7 +492,7 @@ export default function CustomTShirtDesigner() {
 
       const imgElement = new window.Image();
       imgElement.crossOrigin = "Anonymous";
-      imgElement.src = `${activeImage}?timestamp=${new Date().getTime()}`;
+      imgElement.src = activeImage;
 
       imgElement.onload = () => {
         context.drawImage(
@@ -416,9 +503,9 @@ export default function CustomTShirtDesigner() {
           tempCanvas.height,
         );
 
-        if (overlayColor) {
+        if (pantoneColorObject?.hex) {
           context.globalCompositeOperation = "lighten";
-          context.fillStyle = overlayColor;
+          context.fillStyle = `#${pantoneColorObject?.hex}`;
           context.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
           context.globalCompositeOperation = "source-over";
         }
@@ -464,6 +551,8 @@ export default function CustomTShirtDesigner() {
   };
 
   // ================== Set form default values ======================= //
+
+  // Set form default value
   useEffect(() => {
     if (productData) {
       setValue("category", productData.category?.name);
@@ -480,10 +569,6 @@ export default function CustomTShirtDesigner() {
       return errorToast("Please enter prompt!");
     }
 
-    if (prompt?.length < 20) {
-      return errorToast("Prompt can't be less than 20 characters!");
-    }
-
     if (prompt?.length > 300) {
       return errorToast("Prompt can't be more than 300 characters long!");
     }
@@ -492,6 +577,8 @@ export default function CustomTShirtDesigner() {
       const res = await generateWithAi({ prompt }).unwrap();
       if (res?.success) {
         setAiGeneratedImage(res?.data[0]);
+
+        promptRefetch();
       }
     } catch (error) {
       errorToast(error?.data?.message || error?.error);
@@ -501,7 +588,6 @@ export default function CustomTShirtDesigner() {
 
   const handleDownloadImage = (base64Image) => {
     let url = base64Image || aiGeneratedImageLink;
-    console.log(url);
 
     if (!url) {
       return errorToast("Please select an image first!");
@@ -546,8 +632,8 @@ export default function CustomTShirtDesigner() {
       );
     }
 
-    if (!data?.size) {
-      return ErrorModal("Please select size!");
+    if (data?.sizeAndQuantities?.length < 1) {
+      return ErrorModal("Size and quantities are required!");
     }
 
     const toastId = toast.loading("Sending Quote...");
@@ -560,8 +646,6 @@ export default function CustomTShirtDesigner() {
     const payload = {
       name: productData?.name,
       category: productData?.category?._id,
-      quantity: Number(data.quantity),
-      size: data.size,
       pantoneColor: pantoneColorObject?.pantone,
       hexColor: `#${pantoneColorObject?.hex}`,
       materialPreferences: data.materials,
@@ -570,6 +654,7 @@ export default function CustomTShirtDesigner() {
       city: data.city,
       area: data.area,
       houseNo: data.houseNo,
+      sizesAndQuantities: data.sizeAndQuantities,
     };
 
     formData.append("data", JSON.stringify(payload));
@@ -577,6 +662,8 @@ export default function CustomTShirtDesigner() {
     try {
       await createQuote(formData).unwrap();
       successToast("Quote sent successfully!", toastId);
+
+      router.push("/user/quote-history");
     } catch (error) {
       errorToast(error?.data?.message || error?.error, toastId);
     }
@@ -584,11 +671,29 @@ export default function CustomTShirtDesigner() {
 
   return (
     <div>
-      <form onSubmit={handleSubmit(onSendQuoteSubmit)} className="space-y-8">
-        <div className="flex-start-between">
+      <form
+        onSubmit={handleSubmit(onSendQuoteSubmit)}
+        className="space-y-8"
+        onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
+      >
+        <div className="relative flex flex-col items-center lg:flex-row lg:items-start lg:justify-between">
           {/* Left */}
-          <div className="lg:w-[25%]">
-            <div className="flex w-max flex-col items-center gap-y-7 rounded bg-lightGray p-3 text-primary-black">
+          {isSmallDevice && (
+            <div className="absolute -left-5 -top-5">
+              <Edit
+                size={20}
+                onClick={() => setShowLeftToolBox(!showLeftToolBox)}
+              />
+            </div>
+          )}
+
+          <div
+            className={cn(
+              "absolute -left-0 !z-[9999] lg:relative lg:block lg:w-[25%]",
+              isSmallDevice && !showLeftToolBox ? "hidden" : "block",
+            )}
+          >
+            <div className="flex w-max flex-col items-center gap-y-7 rounded bg-gray-200 p-3 text-primary-black lg:bg-lightGray">
               {/* Add Text */}
               <Tooltip placement="right" title="Add Text">
                 <button
@@ -625,7 +730,7 @@ export default function CustomTShirtDesigner() {
               </Tooltip>
 
               {/* Color */}
-              <button
+              {/* <button
                 type="button"
                 className="flex flex-col items-center gap-y-1 font-medium text-primary-black hover:text-primary-black/80"
                 ref={colorBtnRef}
@@ -639,7 +744,7 @@ export default function CustomTShirtDesigner() {
                   />
                 </Tooltip>
                 Color
-              </button>
+              </button> */}
 
               {/* AI Generate */}
               <div className="relative">
@@ -663,6 +768,7 @@ export default function CustomTShirtDesigner() {
                       ? "visible opacity-100"
                       : "invisible opacity-0",
                   )}
+                  ref={aiGenerateBoxRef}
                 >
                   {/* Generated Image */}
                   <div className="flex h-full flex-col">
@@ -670,8 +776,8 @@ export default function CustomTShirtDesigner() {
                       {/* Prompt Count */}
                       <div className="">
                         <Tag color="green" className="rounded-full">
-                          10 Prompts{" "}
-                          <span className="text-[10px] font-medium">/day</span>
+                          {10 - Number(promptCount)} Prompts{" "}
+                          <span className="text-[10px] font-medium">/24hr</span>
                         </Tag>
                       </div>
                       {/* Close Button */}
@@ -715,7 +821,7 @@ export default function CustomTShirtDesigner() {
                             alt="Generated Image"
                             height={1200}
                             width={1200}
-                            className="h-auto w-auto"
+                            className="h-[256px] w-auto"
                           />
                         </div>
                       ) : (
@@ -750,6 +856,11 @@ export default function CustomTShirtDesigner() {
                         }
                         placeholder="Enter prompt..."
                         ref={aiPromptRef}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleGenerateWithAI();
+                          }
+                        }}
                       />
                       {/* Send Button */}
                       <Button
@@ -787,6 +898,7 @@ export default function CustomTShirtDesigner() {
                       ? "visible opacity-100"
                       : "invisible opacity-0",
                   )}
+                  ref={libraryBoxRef}
                 >
                   <div style={{ height: "calc(100% - 70px)" }}>
                     {/* Close Button */}
@@ -860,9 +972,34 @@ export default function CustomTShirtDesigner() {
               <div className="h-[500px] w-3/4 animate-pulse rounded bg-slate-200" />
             </div>
           ) : (
-            <div className="lg:w-[50%]">
-              <div id="tshirt-div" className="group relative w-3/4 bg-white">
-                <div className="relative">
+            <div className="w-full lg:w-[60%] 2xl:w-1/2">
+              <div
+                id="tshirt-div"
+                className="group relative bg-white"
+                style={{
+                  width: isSmallDevice
+                    ? 400
+                    : isTabletDevice
+                      ? 800
+                      : isLargeDevice
+                        ? 470
+                        : 520,
+                  height: isSmallDevice ? 300 : 520,
+                }}
+              >
+                <div
+                  className={cn("relative h-full")}
+                  style={{
+                    width: isSmallDevice
+                      ? 400
+                      : isTabletDevice
+                        ? 800
+                        : isLargeDevice
+                          ? 470
+                          : 520,
+                    height: isSmallDevice ? 300 : 520,
+                  }}
+                >
                   <Image
                     src={
                       activeImageSide === "front"
@@ -872,21 +1009,45 @@ export default function CustomTShirtDesigner() {
                     alt={productData?.name}
                     height={1500}
                     width={1500}
-                    className="mx-auto block h-[500px] w-auto"
+                    className={cn("mx-auto !block")}
+                    style={{
+                      width: isSmallDevice
+                        ? 400
+                        : isTabletDevice
+                          ? 800
+                          : isLargeDevice
+                            ? 470
+                            : 520,
+                      height: isSmallDevice ? 300 : 520,
+                    }}
                     priority={true}
                   />
 
                   <div
                     className="absolute inset-0"
                     style={{
-                      backgroundColor: overlayColor,
+                      backgroundColor: `#${pantoneColorObject?.hex}`,
                       mixBlendMode: "lighten",
                       pointerEvents: "none",
                     }}
                   ></div>
                 </div>
 
-                <div className="absolute inset-0 h-[500px] border border-dashed border-black">
+                <div
+                  className={cn(
+                    "absolute inset-0 w-full border border-dashed border-black",
+                  )}
+                  style={{
+                    width: isSmallDevice
+                      ? 400
+                      : isTabletDevice
+                        ? 800
+                        : isLargeDevice
+                          ? 470
+                          : 520,
+                    height: isSmallDevice ? 300 : 520,
+                  }}
+                >
                   <canvas id="tshirt-canvas" ref={canvasRef}></canvas>
                 </div>
 
@@ -901,7 +1062,7 @@ export default function CustomTShirtDesigner() {
               </div>
 
               {/* Change image side buttons */}
-              <div className="my-10 flex w-3/4 items-center justify-center gap-x-5 text-primary-black">
+              <div className="!z-[9999] my-10 flex w-full items-center justify-center gap-x-5 text-primary-black lg:w-3/4">
                 <Button
                   type="button"
                   variant="outline"
@@ -910,7 +1071,10 @@ export default function CustomTShirtDesigner() {
                     activeImageSide === "front" &&
                       "bg-primary-black text-primary-white",
                   )}
-                  onClick={() => handleChangeImageSide("front")}
+                  onClick={() => {
+                    if (activeImageSide === "front") return;
+                    handleChangeImageSide("front");
+                  }}
                 >
                   Front Side
                 </Button>
@@ -922,7 +1086,10 @@ export default function CustomTShirtDesigner() {
                     activeImageSide === "back" &&
                       "bg-primary-black text-primary-white",
                   )}
-                  onClick={() => handleChangeImageSide("back")}
+                  onClick={() => {
+                    if (activeImageSide === "back") return;
+                    handleChangeImageSide("back");
+                  }}
                 >
                   Back Side
                 </Button>
@@ -931,7 +1098,7 @@ export default function CustomTShirtDesigner() {
           )}
 
           {/* Right */}
-          <div className="h-full lg:w-[30%]">
+          <div className="h-full w-full lg:w-[30%]">
             <Tabs defaultValue="options" className="w-full">
               <TabsList className="w-full py-5">
                 <TabsTrigger
@@ -951,163 +1118,8 @@ export default function CustomTShirtDesigner() {
               </TabsList>
               <TabsContent value="options" className="py-4">
                 <AnimatePresence key={"options"} initial={false}>
-                  {/* Size options */}
-                  <motion.div
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    className={cn(errors?.size && "border-600 rounded-3xl")}
-                  >
-                    <button
-                      type="button"
-                      className="flex-center-between w-full rounded-t-3xl bg-lightGray p-3"
-                      onClick={() => setSizeCollapsed(!sizeCollapsed)}
-                    >
-                      <h5 className="text-base font-semibold">
-                        Available Sizes
-                      </h5>
-                      <ChevronsUpDown size={20} />
-                    </button>
-                    <Separator className="bg-primary-black/50" />
-
-                    {!sizeCollapsed && (
-                      <motion.div
-                        variants={fadeVariants}
-                        className="mx-auto rounded-b-3xl bg-lightGray px-6 py-4 transition-all duration-300 ease-in-out"
-                      >
-                        <Controller
-                          control={control}
-                          name="size"
-                          rules={{
-                            required: {
-                              value: true,
-                              message: "Please select a size!",
-                            },
-                          }}
-                          render={({ field }) => (
-                            <>
-                              <RadioGroup
-                                onValueChange={field.onChange}
-                                className="grid grid-cols-2 gap-5"
-                              >
-                                {productData?.size?.map((size) => (
-                                  <div
-                                    key={size}
-                                    className="flex items-center space-x-2"
-                                  >
-                                    <RadioGroupItem
-                                      value={size}
-                                      id={size}
-                                      className="h-[19px] w-[19px]"
-                                    />
-                                    <Label
-                                      htmlFor={size}
-                                      className="cursor-pointer text-[17px]"
-                                    >
-                                      {size}
-                                    </Label>
-                                  </div>
-                                ))}
-                              </RadioGroup>
-
-                              {errors?.size && (
-                                <p className="mt-2 text-danger">
-                                  {errors?.size?.message}
-                                </p>
-                              )}
-                            </>
-                          )}
-                        />
-                      </motion.div>
-                    )}
-                  </motion.div>
-
-                  {/* Pantone color pallette */}
-                  {pantoneColorObject?.pantone && (
-                    <motion.div
-                      className="mt-8"
-                      layout="position"
-                      initial="initial"
-                      animate="animate"
-                      exit="exit"
-                    >
-                      <button
-                        type="button"
-                        className="flex-center-between w-full rounded-t-3xl bg-lightGray p-3"
-                        onClick={() =>
-                          setPantoneColorCollapsed(!pantoneColorCollapsed)
-                        }
-                      >
-                        <h5 className="flex-center-start gap-x-2 text-base font-semibold">
-                          Pantone Palette{" "}
-                          <Popover
-                            content={
-                              <div>
-                                <p>
-                                  United Threads accepts only
-                                  <i> Pantone Color Code</i>
-                                  (e.g Pantone C-1305) for apparel colors.
-                                </p>
-                                <p>
-                                  Our Pantone code follows distance from 16-96
-                                  and provides nearest color matches.
-                                </p>
-                              </div>
-                            }
-                            title={<strong>What is Pantone Color Code?</strong>}
-                          >
-                            <Info size={16} className="text-blue-600" />
-                          </Popover>
-                        </h5>
-                        <ChevronsUpDown size={20} />
-                      </button>
-                      <Separator className="bg-primary-black/50" />
-
-                      {!pantoneColorCollapsed && (
-                        <motion.div
-                          variants={fadeVariants}
-                          className="flex-center-start mx-auto gap-x-2 rounded-b-3xl bg-lightGray px-6 py-4"
-                          ref={pantoneColorRef}
-                        >
-                          <Tooltip
-                            placement="top"
-                            title={"#" + pantoneColorObject?.hex}
-                          >
-                            <div
-                              style={{
-                                backgroundColor: `#${pantoneColorObject?.hex}`,
-                              }}
-                              className={cn(
-                                "aspect-square h-6 w-6 rounded-full",
-                                overlayColor === "#" + pantoneColorObject.hex &&
-                                  "border-2 border-yellow-500",
-                              )}
-                            />
-                          </Tooltip>
-
-                          <div className="flex-center-between w-full">
-                            <button
-                              type="button"
-                              className="text-lg font-medium"
-                              onClick={() =>
-                                setOverlayColor("#" + pantoneColorObject?.hex)
-                              }
-                            >
-                              Pantone {pantoneColorObject?.pantone}
-                            </button>
-
-                            <div className="h-1 w-1 rounded-full bg-primary-black" />
-
-                            <p>(d: 16/{pantoneColorObject?.distance})</p>
-                          </div>
-                        </motion.div>
-                      )}
-                    </motion.div>
-                  )}
-
                   {/* Color options */}
                   <motion.div
-                    className="mt-8"
                     layout="position"
                     initial="initial"
                     animate="animate"
@@ -1130,66 +1142,247 @@ export default function CustomTShirtDesigner() {
                         variants={fadeVariants}
                         className="mx-auto grid gap-2 rounded-b-3xl bg-lightGray px-6 py-4 lg:grid-cols-2"
                       >
-                        {productData?.colorsPreferences?.map((hex) => (
+                        {productData?.colorsPreferences?.map((pantone) => (
                           <button
                             type="button"
-                            key={hex}
+                            key={pantone}
                             className="flex-center-start gap-x-2"
-                            onClick={() => handleColorChange(hex)}
+                            onClick={() => handleColorChange(pantone)}
                           >
-                            <div
-                              style={{ backgroundColor: hex }}
-                              className={cn(
-                                "h-5 w-5 rounded-full",
-                                overlayColor === hex &&
-                                  "border-2 border-yellow-500",
-                              )}
-                            />
-                            <h5 className="text-lg font-medium">{hex}</h5>
+                            {pantoneToHex(pantone) && (
+                              <div
+                                style={{
+                                  backgroundColor: pantoneToHex(pantone),
+                                }}
+                                className={cn("h-5 w-5 rounded-full")}
+                              />
+                            )}
+                            <h5 className="text-lg font-medium">{pantone}</h5>
                           </button>
                         ))}
                       </motion.div>
                     )}
                   </motion.div>
+
+                  {/* Input color */}
+                  {pantoneColorObject?.pantone && (
+                    <motion.div
+                      className="mt-8"
+                      layout="position"
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                    >
+                      <button
+                        type="button"
+                        className="flex-center-between w-full rounded-t-3xl bg-lightGray p-3"
+                        onClick={() =>
+                          setPantoneColorCollapsed(!pantoneColorCollapsed)
+                        }
+                      >
+                        <h5 className="flex-center-start gap-x-2 text-base font-semibold">
+                          Select a color
+                          <Popover
+                            content={
+                              <div>
+                                <p>
+                                  United Threads accepts only
+                                  <i> Pantone Color Code</i>
+                                  (e.g Pantone C-1305) for apparel colors.
+                                </p>
+                              </div>
+                            }
+                            title={<strong>What is Pantone Color Code?</strong>}
+                          >
+                            <Info size={16} className="text-blue-600" />
+                          </Popover>
+                        </h5>
+                        <ChevronsUpDown size={20} />
+                      </button>
+                      <Separator className="bg-primary-black/50" />
+
+                      {!pantoneColorCollapsed && (
+                        <motion.div
+                          variants={fadeVariants}
+                          className="rounded-b-3xl bg-lightGray px-6 py-4"
+                          ref={pantoneColorRef}
+                        >
+                          <div className="flex-center-between w-full">
+                            {!addColorInputVisible && (
+                              <div className="flex-center-start gap-x-2">
+                                <Tooltip
+                                  placement="top"
+                                  title={
+                                    typeof pantoneColorObject?.hex !== "string"
+                                      ? "No matching color found!"
+                                      : "#" + pantoneColorObject?.hex
+                                  }
+                                >
+                                  {typeof pantoneColorObject?.hex ===
+                                    "string" && (
+                                    <div
+                                      style={{
+                                        backgroundColor: `#${pantoneColorObject?.hex}`,
+                                      }}
+                                      className={cn(
+                                        "aspect-square h-6 w-6 rounded-full",
+                                        overlayColor ===
+                                          "#" + pantoneColorObject.hex &&
+                                          "border-2 border-yellow-500",
+                                      )}
+                                    />
+                                  )}
+
+                                  {typeof pantoneColorObject?.hex !==
+                                    "string" && (
+                                    <p className="-300 aspect-square rounded-full border p-1 text-sm text-red-500">
+                                      N/A
+                                    </p>
+                                  )}
+                                </Tooltip>
+
+                                <button
+                                  type="button"
+                                  className="text-lg font-medium"
+                                >
+                                  Pantone {pantoneColorObject?.pantone}
+                                </button>
+                              </div>
+                            )}
+
+                            {addColorInputVisible ? (
+                              <ConfigProvider
+                                theme={{
+                                  components: {
+                                    Input: {
+                                      colorBorder: "rgb(0,0,0)",
+                                      hoverBorderColor: "rgb(0,0,0)",
+                                      activeBorderColor: "rgba(0,0,0,0.48)",
+                                    },
+                                  },
+                                }}
+                              >
+                                <AntInput
+                                  ref={addColorInputRef}
+                                  type="text"
+                                  size="small"
+                                  value={overlayColor}
+                                  onChange={handleAddColor}
+                                  onPressEnter={handleColorConfirmOnEnter}
+                                  onBlur={() => setAddColorInputVisible(false)}
+                                  style={{
+                                    height: "40px",
+                                    borderRadius: "10px",
+                                    paddingInline: "16px",
+                                  }}
+                                  placeholder="Enter pantone color code"
+                                />
+                              </ConfigProvider>
+                            ) : (
+                              <Tag
+                                // icon={<Plus size={20} />}
+                                onClick={() => setAddColorInputVisible(true)}
+                                onClose={handleClose}
+                                style={{
+                                  paddingBlock: "8px",
+                                  borderStyle: "dashed",
+                                  display: "flex",
+                                  gap: "3px",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontWeight: "bold",
+                                  color: "gray",
+                                  borderRadius: "10px",
+                                }}
+                              >
+                                <PlusCircle size={18} color="gray" /> Change
+                                Color
+                              </Tag>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  )}
                 </AnimatePresence>
               </TabsContent>
+
               <TabsContent
                 value="preview"
                 className="rounded-b-xl border border-dashed p-3"
               >
-                <div>
-                  <h4 className="text-lg font-semibold">Front Side *</h4>
-                  {savedFrontImageUrl ? (
-                    <div className="mx-auto h-[300px] w-[300px]">
-                      <AntImage
-                        src={savedFrontImageUrl}
-                        alt="front side image"
-                      />
-                    </div>
-                  ) : (
-                    <p className="text-center">No saved image</p>
-                  )}
-                </div>
+                <AntImage.PreviewGroup>
+                  <div>
+                    <div className="flex-center-between">
+                      <h4 className="text-lg font-semibold">Front Side *</h4>
 
-                <Separator className="my-10" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!savedFrontImageUrl) {
+                            return message.error(
+                              "No saved back side image found",
+                            );
+                          }
 
-                <div>
-                  <h4 className="text-lg font-semibold">Back Side *</h4>
-                  {savedBackImageUrl ? (
-                    <div className="mx-auto h-[300px] w-[300px]">
-                      <AntImage src={savedBackImageUrl} alt="back side image" />
+                          handleDownloadImage(savedFrontImageUrl);
+                        }}
+                      >
+                        <Download size={20} />
+                      </button>
                     </div>
-                  ) : (
-                    <p className="text-center">No saved image</p>
-                  )}
-                </div>
+                    {savedFrontImageUrl ? (
+                      <div className="mx-auto h-[300px] w-[300px]">
+                        <AntImage
+                          src={savedFrontImageUrl}
+                          alt="front side image"
+                        />
+                      </div>
+                    ) : (
+                      <p className="text-center">No saved image</p>
+                    )}
+                  </div>
+
+                  <Separator className="my-5" />
+
+                  <div>
+                    <div className="flex-center-between">
+                      <h4 className="text-lg font-semibold">Back Side *</h4>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!savedBackImageUrl) {
+                            return message.error(
+                              "No saved back side image found",
+                            );
+                          }
+
+                          handleDownloadImage(savedBackImageUrl);
+                        }}
+                      >
+                        <Download size={20} />
+                      </button>
+                    </div>
+                    {savedBackImageUrl ? (
+                      <div className="mx-auto h-[300px] w-[300px]">
+                        <AntImage
+                          src={savedBackImageUrl}
+                          alt="back side image"
+                        />
+                      </div>
+                    ) : (
+                      <p className="text-center">No saved image</p>
+                    )}
+                  </div>
+                </AntImage.PreviewGroup>
               </TabsContent>
             </Tabs>
           </div>
         </div>
 
-        {/* Bottom --- Additional options */}
-        <h3 className="mb-8 mt-20 text-2xl font-bold">Additional Options</h3>
+        {/* Bottom --- Request Quote Form */}
+        <h3 className="mb-8 mt-20 text-2xl font-bold">Request Quote Form</h3>
 
         <div className="grid w-full items-center gap-2">
           <Label
@@ -1208,26 +1401,13 @@ export default function CustomTShirtDesigner() {
           />
         </div>
 
-        <div className="grid w-full items-center gap-2">
-          <Label
-            htmlFor="quantity"
-            className="mb-1 block font-semibold text-primary-black"
-          >
-            Quantity(pcs)
-          </Label>
-          <Input
-            type="number"
-            id="quantity"
-            placeholder="Enter your quantity"
-            {...register("quantity", {
-              required: true,
-            })}
-            className="rounded-xl border border-primary-black bg-transparent text-primary-black outline-none"
-          />
-          {errors.quantity && (
-            <p className="mt-1 text-danger">Quantity is required</p>
-          )}
-        </div>
+        {/* Size and quantity */}
+        <SizeSelectComponent
+          control={control}
+          sizes={productData?.size ? sizeSorter(productData?.size) : []}
+          setValue={setValue}
+          errors={errors}
+        />
 
         <div className="grid w-full items-center gap-2">
           <Label
@@ -1273,7 +1453,7 @@ export default function CustomTShirtDesigner() {
           disabled={isQuoteLoading}
           className="group mt-10 h-[2.8rem] w-full gap-x-2 rounded-xl bg-primary-black font-semibold"
         >
-          Send Quote <AnimatedArrow />
+          Request for a Quote <AnimatedArrow />
         </Button>
       </form>
 

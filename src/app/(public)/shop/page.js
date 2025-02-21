@@ -19,12 +19,10 @@ export default function ShopPage() {
           }}
         />
 
-        <div className="flex-start-between my-16 lg:mx-auto lg:w-3/4 lg:gap-x-16">
-          <div className="lg:w-[22%]">
-            <ShopProductsFilter />
-          </div>
+        <div className="flex-start-between mx-auto my-16 flex-col px-5 md:px-10 lg:mx-auto lg:w-[90%] lg:flex-row lg:gap-x-16 lg:px-0 2xl:w-3/4">
+          <ShopProductsFilter />
 
-          <div className="lg:flex-grow">
+          <div className="w-full lg:flex-grow">
             <ShopContainer />
           </div>
         </div>

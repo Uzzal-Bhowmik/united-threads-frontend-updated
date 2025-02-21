@@ -4,6 +4,7 @@ import ShadeApprovedTable from "./_components/ShadeApprovedTable";
 import { CheckCheck } from "lucide-react";
 import ShadePendingTable from "./_components/ShadePendingTable";
 import { Clock } from "lucide-react";
+import { Hourglass } from "lucide-react";
 
 export const metadata = {
   title: "Quote History",
@@ -14,18 +15,18 @@ export default function OrderHistoryPage() {
   return (
     <div>
       <CommonPageHeader
-        pageTitle="Order History"
+        pageTitle="Quote History"
         previousPage={{
           pageTitle: "Home",
         }}
       />
 
-      <div className="my-10 lg:mx-auto lg:w-3/4">
+      <div className="my-10 px-5 md:px-10 lg:mx-auto lg:w-[90%] lg:px-0 2xl:w-3/4">
         <Tabs defaultValue="shadeApprovalPending" className="w-full">
           <TabsList className="px-2 py-6 shadow">
             <TabsTrigger value="shadeApprovalPending" className="py-2 text-sm">
-              <Clock size={18} className="mr-2 text-blue-700" /> Design Approval
-              Pending...
+              <Hourglass size={18} className="mr-2 text-blue-700" /> Design
+              Approval Pending...
             </TabsTrigger>
             <TabsTrigger value="shadeApproved" className="py-2 text-sm">
               <CheckCheck size={18} className="mr-2 text-success" /> Approved

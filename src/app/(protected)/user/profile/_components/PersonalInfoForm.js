@@ -33,6 +33,7 @@ export default function PersonalInfoForm({ user }) {
       setValue("email", user?.email);
       setValue("contact", user?.contact);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const onSubmit = async (data) => {

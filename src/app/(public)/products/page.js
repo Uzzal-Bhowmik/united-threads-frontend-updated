@@ -5,8 +5,8 @@ import ProductsContainer from "./_components/ProductsContainer";
 import QuoteProductsPageProvider from "@/context/QuoteProductsPageContext";
 
 export const metadata = {
-  title: "Products",
-  description: "Products page",
+  title: "Custom Apparels",
+  description: "Custom apparels page",
 };
 
 export default function ProductsPage() {
@@ -14,20 +14,18 @@ export default function ProductsPage() {
     <QuoteProductsPageProvider>
       <div>
         <CommonPageHeader
-          pageTitle="Products"
+          pageTitle="Custom Apparels"
           previousPage={{
             pageTitle: "Home",
             pageRoute: "/",
           }}
         />
 
-        <section className="flex-start-between my-16 lg:mx-auto lg:w-3/4 lg:gap-x-16">
+        <section className="flex-start-between my-16 flex-col px-5 md:px-10 lg:mx-auto lg:w-[90%] lg:flex-row lg:gap-x-16 lg:px-0 2xl:w-3/4">
           {/* Left -------> Filters */}
-          <div className="lg:w-[22%]">
-            <ProductFilters />
-          </div>
+          <ProductFilters />
 
-          <div className="lg:flex-grow">
+          <div className="w-full lg:flex-grow">
             <ProductsContainer />
           </div>
         </section>

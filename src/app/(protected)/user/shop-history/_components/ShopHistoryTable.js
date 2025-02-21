@@ -27,21 +27,26 @@ import EmptyContainer from "@/components/EmptyContainer/EmptyContainer";
 import CustomPagination from "@/components/CustomPagination/CustomPagination";
 import { Tag } from "antd";
 import { getTableTagColor } from "@/utils/getTableTagColor";
+import { formatCurrency } from "@/utils/formatCurrency";
+import TableLoaderWithEmpty from "@/components/TableLoaderWithEmpty/TableLoaderWithEmpty";
+import { useCreatePaymentMutation } from "@/redux/api/paymentApi";
+import { errorToast, successToast } from "@/utils/customToast";
 
 const TABLE_HEADERS = [
   "Order ID",
   "Product",
   "Category",
-  "Quantity",
   "Order Created",
   "Total Amount",
   "Status",
+  "Payment",
   "Action",
 ];
 
 const ORDER_STATUS = ["All", "Pending", "Shipped", "Delivered"];
 
 export default function ShopHistoryTable() {
+  const [payingOrderId, setPayingOrderId] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("All");
   const query = {};
 
@@ -56,9 +61,29 @@ export default function ShopHistoryTable() {
   query["limit"] = pageSize;
 
   // ================ Get shop order details ================
-  const { data: ordersRes } = useGetOrdersQuery(query);
+  const { data: ordersRes, isLoading } = useGetOrdersQuery(query);
   const orders = ordersRes?.data || [];
   const meta = ordersRes?.meta || {};
+
+  // ============== Payment api handler =================
+  const [createPaymentLink, { isLoading: isCreatingPayment }] =
+    useCreatePaymentMutation();
+
+  // Handle payment
+  const handlePaymentForQuote = async (orderId) => {
+    setPayingOrderId(orderId);
+
+    try {
+      const createPaymentRes = await createPaymentLink(orderId).unwrap();
+
+      successToast("Proceed to payment....");
+      window.location.href = createPaymentRes?.data?.paymentLink;
+    } catch (error) {
+      errorToast(error?.data?.message || error?.error || error?.message);
+    } finally {
+      setPayingOrderId(null);
+    }
+  };
 
   return (
     <div
@@ -71,7 +96,7 @@ export default function ShopHistoryTable() {
             {TABLE_HEADERS.map((header) => (
               <TableHead
                 key={header}
-                className="text-lg font-semibold text-primary-black"
+                className="whitespace-nowrap text-lg font-semibold text-primary-black"
                 style={{ paddingBlock: "14px" }}
               >
                 {header !== "Status" && header}
@@ -107,58 +132,111 @@ export default function ShopHistoryTable() {
         </TableHeader>
 
         <TableBody style={{ padding: "14px" }}>
-          {orders?.map((order) => (
-            <TableRow
-              key={order?._id}
-              className="border-b border-primary-black/15"
-            >
-              <TableCell className="py-5 font-medium">#{order?._id}</TableCell>
-              <TableCell className="py-5 font-medium">
-                {order?.quote?.name || order?.product?.name}
-              </TableCell>
-              <TableCell className="py-5 font-medium">
-                {order?.quote?.category?.name || order?.product?.category?.name}
-              </TableCell>
-              <TableCell className="py-5 font-medium">
-                {order?.quantity}
-              </TableCell>
-              <TableCell className="py-5 font-medium">
-                {order?.createdAt &&
-                  format(order?.createdAt, "dd MMM yyyy, hh:mm a")}
-              </TableCell>
-              <TableCell className="py-5 font-medium">
-                ${Number(order?.amount * order?.quantity)?.toFixed(2)}
-              </TableCell>
-              <TableCell className={cn("py-5 font-medium")}>
-                <Tag
-                  color={getTableTagColor(order?.status)}
-                  style={{ fontWeight: "bold" }}
-                >
-                  {order?.status}
-                </Tag>
-              </TableCell>
+          {/* ======== Show loading or empty if no pending quotes ======== */}
+          <TableLoaderWithEmpty isLoading={isLoading} data={orders} />
 
-              <TableCell>
-                <Button variant="outline" asChild className="group gap-x-2">
+          {orders?.length > 0 &&
+            orders?.map((order) => (
+              <TableRow
+                key={order?._id}
+                className="border-b border-primary-black/15"
+              >
+                <TableCell className="py-5 font-medium">
+                  #{order?._id}
+                </TableCell>
+                <TableCell className="y-5 font-medium">
+                  {order?.quote?.name || order?.product?.name}
+                </TableCell>
+                <TableCell className="w-max whitespace-nowrap py-5 font-medium">
+                  {order?.quote?.category?.name ||
+                    order?.product?.category?.name}
+                </TableCell>
+
+                <TableCell className="w-max whitespace-nowrap py-5 font-medium">
+                  {order?.createdAt &&
+                    format(order?.createdAt, "dd MMM yyyy, hh:mm a")}
+                </TableCell>
+                <TableCell className="w-max whitespace-nowrap py-5 font-medium">
+                  $
+                  {formatCurrency(
+                    order?.orderType === "SHOP"
+                      ? Number(order?.amount * order?.quantity)
+                      : order?.amount,
+                  )}
+                </TableCell>
+
+                <TableCell
+                  className={cn("w-max whitespace-nowrap py-5 font-medium")}
+                >
+                  <Tag
+                    color={getTableTagColor(order?.status)}
+                    style={{ fontWeight: "bold" }}
+                  >
+                    {order?.status}
+                  </Tag>
+                </TableCell>
+
+                <TableCell
+                  className={cn("w-max whitespace-nowrap py-5 font-medium")}
+                >
+                  <Tag
+                    color={getTableTagColor(order?.paymentStatus)}
+                    style={{ fontWeight: "bold" }}
+                  >
+                    {order?.paymentStatus}
+                  </Tag>
+                </TableCell>
+
+                <TableCell>
                   {order?.status === "DELIVERED" &&
                   order?.orderType === "SHOP" ? (
-                    <Link href={`/user/shop-history/${order?.product?._id}`}>
-                      Share Review <AnimatedArrow />
-                    </Link>
+                    <Button
+                      variant="outline"
+                      asChild
+                      className="group w-full gap-x-2"
+                    >
+                      <Link
+                        href={`/shop/product/${order?.product?._id}?review=true`}
+                      >
+                        Share Review <AnimatedArrow />
+                      </Link>
+                    </Button>
                   ) : (
-                    <Link href={`/user/shop-history/${order?._id}`}>
-                      View Details <AnimatedArrow />
-                    </Link>
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="group gap-x-2"
+                      >
+                        <Link href={`/user/shop-history/${order?._id}`}>
+                          View Details <AnimatedArrow arrowSize={16} />
+                        </Link>
+                      </Button>
+
+                      {order?.paymentStatus === "UNPAID" && (
+                        <Button
+                          className="group gap-x-2"
+                          onClick={() => handlePaymentForQuote(order?._id)}
+                        >
+                          {isCreatingPayment && payingOrderId === order?._id ? (
+                            "loading..."
+                          ) : (
+                            <>
+                              Pay <AnimatedArrow arrowSize={16} />
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
                   )}
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
 
       {orders?.length > 9 && (
-        <div className="ml-auto mt-10 max-w-max">
+        <div className="ml-auto mt-10 max-w-max whitespace-nowrap">
           <CustomPagination
             currentPage={currentPage}
             pageSize={pageSize}

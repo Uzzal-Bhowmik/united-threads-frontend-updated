@@ -11,17 +11,18 @@ export default function Features() {
     <section className="lg:mx-auto">
       <div className="flex-center gap-x-2">
         <Image src={droplet} alt="droplet" height={20} width={20} />
-        <p className="text-center text-2xl font-medium text-primary-black">
-          All the features you need
+        <p className="text-center text-xl font-medium text-primary-black lg:text-2xl">
+          All the solutions you need
         </p>
       </div>
 
-      <h1 className="mb-16 mt-4 text-center text-6xl font-extrabold text-primary-black">
+      <h1 className="mb-16 mt-4 text-center text-5xl font-extrabold text-primary-black lg:text-5xl xl:text-6xl">
         Fast and Quality Service
       </h1>
 
-      <div className="flex w-full items-stretch justify-between gap-x-14">
-        <div className="flex w-full flex-col items-start gap-y-3 lg:w-1/4">
+      <div className="grid w-full grid-cols-1 gap-x-14 gap-y-10 md:grid-cols-2 md:gap-y-16 lg:grid-cols-4 lg:gap-y-0">
+        {/* ------- Feature 1 ---------- */}
+        <div className="flex w-full flex-col items-center gap-y-3 text-center md:items-start md:text-left">
           <div className="flex-center h-20 w-20 rounded-xl bg-slate-200 p-4">
             <Image
               src={customProductIcon}
@@ -38,7 +39,8 @@ export default function Features() {
           </p>
         </div>
 
-        <div className="flex w-full flex-col items-start gap-y-3 lg:w-1/4">
+        {/* ------- Feature 2 ---------- */}
+        <div className="flex w-full flex-col items-center gap-y-3 text-center md:items-start md:text-left">
           <div className="flex-center h-20 w-20 rounded-xl bg-slate-200 p-4">
             <Image
               src={shippingIcon}
@@ -56,7 +58,8 @@ export default function Features() {
           </p>
         </div>
 
-        <div className="flex w-full flex-col items-start gap-y-3 lg:w-1/4">
+        {/* ------- Feature 3 ---------- */}
+        <div className="flex w-full flex-col items-center gap-y-3 text-center md:items-start md:text-left">
           <div className="flex-center h-20 w-20 rounded-xl bg-slate-200 p-4">
             <Image
               src={customDesignIcon}
@@ -74,7 +77,8 @@ export default function Features() {
           </p>
         </div>
 
-        <div className="flex w-full flex-col items-start gap-y-3 lg:w-1/4">
+        {/* ------- Feature 4 ---------- */}
+        <div className="flex w-full flex-col items-center gap-y-3 text-center md:items-start md:text-left">
           <div className="flex-center h-20 w-20 rounded-xl bg-slate-200 p-4">
             <Image src={clockIcon} alt="clock icon" className="h-full w-full" />
           </div>

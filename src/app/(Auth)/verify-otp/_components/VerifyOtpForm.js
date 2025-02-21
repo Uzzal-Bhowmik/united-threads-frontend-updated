@@ -44,7 +44,6 @@ export default function VerifyOtpForm() {
 
     try {
       const res = await verifyOtp({ otp: Number(value) }).unwrap();
-      console.log(res);
 
       if (res?.success) {
         SuccessModal("OTP Verified", "Please login to your account.");
@@ -138,14 +137,14 @@ export default function VerifyOtpForm() {
       </div>
 
       {/* Resend otp button */}
-      <Button
+      {/* <Button
         variant="outline"
         className="absolute -top-9 right-0 h-6 rounded-full border border-primary-black text-xs font-medium"
         disabled={resendOtpLoading}
         onClick={handleResendOtp}
       >
         Resend Otp <RotateCw size={14} className="ml-2" />
-      </Button>
+      </Button> */}
 
       <Button
         disabled={isLoading || value?.length < 6}
@@ -155,6 +154,18 @@ export default function VerifyOtpForm() {
       >
         {isLoading ? <CustomLoader /> : "Verify OTP"}
       </Button>
+
+      {/* Resend otp button */}
+      <div className="mx-auto my-2 max-w-max">
+        <Button
+          variant="link"
+          disabled={resendOtpLoading}
+          onClick={handleResendOtp}
+          className=""
+        >
+          Resend Otp
+        </Button>
+      </div>
 
       {formError && <CustomFormError formError={formError} />}
     </div>

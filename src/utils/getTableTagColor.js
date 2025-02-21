@@ -8,6 +8,10 @@ export const getTableTagColor = (status) => {
       return "green";
     case "CANCELED":
       return "red";
+    case "PAID":
+      return "green";
+    case "UNPAID":
+      return "red";
     default:
       return "bg-red-500";
   }

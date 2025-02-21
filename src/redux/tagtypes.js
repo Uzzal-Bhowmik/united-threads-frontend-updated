@@ -17,6 +17,7 @@ export const tagTypes = {
   library: "Library",
   aiGeneratedImage: "AiGeneratedImage",
   messages: "Messages",
+  notifications: "Notifications",
 
   // Quote Page
   quoteProducts: "QuoteProducts",
@@ -53,6 +54,7 @@ export const tagTypesList = [
   tagTypes.library,
   tagTypes.aiGeneratedImage,
   tagTypes.messages,
+  tagTypes.notifications,
 
   // Quote Page
   tagTypes.quoteProduct,

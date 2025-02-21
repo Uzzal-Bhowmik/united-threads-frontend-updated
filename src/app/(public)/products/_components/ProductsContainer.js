@@ -14,11 +14,13 @@ const fadeUpVariants = {
   initial: {
     y: 10,
     opacity: 0,
+    filter: "blur(2px)",
   },
 
   animate: {
     y: 0,
     opacity: 1,
+    filter: "blur(0px)",
     transition: {
       stiffness: 190,
       damping: 35,
@@ -42,7 +44,7 @@ export default function ProductsContainer() {
 
   // ================= Pagination ===============
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 12;
+  const pageSize = 9;
   query["page"] = currentPage;
   query["limit"] = pageSize;
 
@@ -73,10 +75,14 @@ export default function ProductsContainer() {
         variants={fadeUpVariants}
         initial="initial"
         animate="animate"
-        className="grid grid-cols-1 md:grid-cols-2 md:gap-7 lg:grid-cols-3"
+        className="grid grid-cols-1 gap-y-7 md:grid-cols-2 md:gap-7 2xl:grid-cols-3"
       >
         {quoteProducts?.map((product) => (
-          <motion.div key={product?._id} variants={fadeUpVariants}>
+          <motion.div
+            key={product?._id}
+            variants={fadeUpVariants}
+            className="h-full"
+          >
             <QuoteProductCard product={product} />
           </motion.div>
         ))}

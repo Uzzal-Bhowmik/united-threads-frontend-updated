@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function ProfilePage() {
   return (
-    <div className="lg:mx-auto lg:w-3/4">
+    <div className="px-5 md:px-10 lg:mx-auto lg:w-[90%] 2xl:w-3/4">
       <ProfileContainer />
     </div>
   );

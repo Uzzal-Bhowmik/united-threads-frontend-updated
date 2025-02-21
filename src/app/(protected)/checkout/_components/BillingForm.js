@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -114,7 +115,6 @@ export default function BillingForm({ goToNextStep }) {
         const res = await createPayment(orderRes?.data[0]?._id).unwrap();
 
         if (res?.success) {
-          console.log(res);
           successToast("Saved. Proceed to payment", toastId);
 
           window.location.href = res?.data?.paymentLink;

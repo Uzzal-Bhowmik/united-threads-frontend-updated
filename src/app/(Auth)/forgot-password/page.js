@@ -1,6 +1,6 @@
-import Image from "next/image";
 import forgotGraphic from "/public/images/forgot password/Group 14582639.png";
 import ForgotPasswordForm from "./_components/ForgotPasswordForm";
+import { CustomImageWithBlur } from "@/components/CustomImageWithBlur/CustomImageWithBlur";
 
 export const metadata = {
   title: "Forgot Password",
@@ -11,9 +11,9 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex-center gap-x-20 rounded-xl border border-gray-200 p-10 py-16 shadow-[0px_0px_2px_lightGray]">
       <div className="lg:w-1/2">
-        <Image
+        <CustomImageWithBlur
           src={forgotGraphic}
-          alt="forgot password graphic"
+          alt="Forgot Password Graphic"
           className="mx-auto block lg:w-3/4"
         />
       </div>

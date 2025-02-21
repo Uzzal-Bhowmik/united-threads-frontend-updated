@@ -11,7 +11,10 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import Link from "next/link";
-import { useGetAllCategoriesQuery } from "@/redux/api/Shop Page Api/shopApi";
+import {
+  useGetAllCategoriesQuery,
+  useGetShopCategoriesQuery,
+} from "@/redux/api/Shop Page Api/shopApi";
 import { motion } from "framer-motion";
 
 // Motion Variants
@@ -32,12 +35,11 @@ const fadeIn = {
 };
 
 export default function Categories() {
-  const { data: categoryRes, isLoading } = useGetAllCategoriesQuery();
-  const categories = categoryRes?.data || [];
+  const { data: categories, isLoading } = useGetShopCategoriesQuery();
 
   return (
     <section className="text-primary-black">
-      <h2 className="px-10 py-1 text-center text-6xl font-extrabold">
+      <h2 className="py-1 text-center text-5xl font-extrabold lg:px-10 lg:text-6xl">
         Shop By Categories
       </h2>
 
@@ -50,7 +52,7 @@ export default function Categories() {
         className="mt-16"
       >
         {isLoading ? (
-          <div className="max-w-3/4 mx-auto grid grid-cols-2 gap-x-5 overflow-auto md:grid-cols-3 lg:grid-cols-5">
+          <div className="max-w-3/4 hide-scroll mx-auto flex items-center gap-x-4 overflow-auto">
             {Array?.from({ length: 5 })?.map((_, idx) => (
               <div key={idx} className="w-full">
                 <div
@@ -80,7 +82,7 @@ export default function Categories() {
               {categories?.map((category) => (
                 <CarouselItem
                   key={category?._id}
-                  className="w-full lg:basis-1/6"
+                  className="w-full basis-1/2 md:basis-1/3 lg:basis-1/6"
                 >
                   <Link
                     href={
@@ -107,8 +109,8 @@ export default function Categories() {
               ))}
             </CarouselContent>
 
-            <CarouselNext className="lg:-right-16" />
-            <CarouselPrevious className="lg:-left-16" />
+            <CarouselNext className="hidden lg:-right-16 lg:flex" />
+            <CarouselPrevious className="hidden lg:-left-16 lg:flex" />
           </Carousel>
         )}
       </motion.div>

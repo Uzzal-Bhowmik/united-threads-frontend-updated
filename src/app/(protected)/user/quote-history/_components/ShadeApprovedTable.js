@@ -14,7 +14,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EyeIcon } from "lucide-react";
 import { useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import { Check } from "lucide-react";
@@ -22,9 +21,13 @@ import { useGetQuotesQuery } from "@/redux/api/quoteApi";
 import { format } from "date-fns";
 import QuoteApprovedModal from "./QuoteApprovedModal";
 import CustomPagination from "@/components/CustomPagination/CustomPagination";
+import AnimatedArrow from "@/components/AnimatedArrow/AnimatedArrow";
+import { Button } from "@/components/ui/button";
+import pantoneToHex from "@/utils/pantoneToHex";
+import TableLoaderWithEmpty from "@/components/TableLoaderWithEmpty/TableLoaderWithEmpty";
 
 const TABLE_HEADERS = [
-  "Order ID",
+  "Quote ID",
   "Product",
   "Category",
   "Pantone",
@@ -47,9 +50,10 @@ export default function ShadeApprovedTable() {
   const pageSize = 10;
   query["page"] = currentPage;
   query["limit"] = pageSize;
+  query["isAccepted"] = false;
 
   // ================== Get Pending Quotes =================
-  const { data: approvedQuotesRes } = useGetQuotesQuery(query);
+  const { data: approvedQuotesRes, isLoading } = useGetQuotesQuery(query);
   const approvedQuotes = approvedQuotesRes?.data || [];
   const meta = approvedQuotesRes?.data?.meta || {};
 
@@ -61,7 +65,7 @@ export default function ShadeApprovedTable() {
             {TABLE_HEADERS.map((header) => (
               <TableHead
                 key={header}
-                className="text-lg font-semibold text-primary-black"
+                className="whitespace-nowrap text-lg font-semibold text-primary-black"
                 style={{ paddingBlock: "14px" }}
               >
                 {header !== "Status" && header}
@@ -96,58 +100,61 @@ export default function ShadeApprovedTable() {
           </TableRow>
         </TableHeader>
         <TableBody style={{ padding: "14px" }}>
-          {approvedQuotes?.map((quote) => (
-            <TableRow
-              key={quote?._id}
-              className="border-b border-primary-black/15"
-            >
-              <TableCell className="py-5 font-medium">#{quote?._id}</TableCell>
-              <TableCell className="py-5 font-medium">{quote?.name}</TableCell>
-              <TableCell className="py-5 font-medium">
-                {quote?.category?.name}
-              </TableCell>
+          {/* ======== Show loading or empty if no pending quotes ======== */}
+          <TableLoaderWithEmpty isLoading={isLoading} data={approvedQuotes} />
 
-              <TableCell className="flex items-center gap-x-2 py-5 font-medium">
-                <div
-                  className="h-5 w-5 rounded-full"
-                  style={{
-                    backgroundColor: quote?.hexColor?.includes("#")
-                      ? quote?.hexColor
-                      : `#${quote?.hexColor}`,
-                  }}
-                />
+          {!isLoading &&
+            approvedQuotes?.length > 0 &&
+            approvedQuotes?.map((quote) => (
+              <TableRow
+                key={quote?._id}
+                className="border-b border-primary-black/15"
+              >
+                <TableCell className="py-5 font-medium">
+                  #{quote?._id}
+                </TableCell>
+                <TableCell className="w-max whitespace-nowrap py-5 font-medium">
+                  {quote?.name}
+                </TableCell>
+                <TableCell className="w-max whitespace-nowrap py-5 font-medium">
+                  {quote?.category?.name}
+                </TableCell>
 
-                {quote?.pantoneColor}
-              </TableCell>
+                <TableCell className="flex w-max items-center gap-x-2 whitespace-nowrap py-8 font-medium">
+                  <div
+                    className="h-5 w-5 rounded-full"
+                    style={{
+                      backgroundColor: pantoneToHex(quote?.pantoneColor),
+                    }}
+                  />
 
-              <TableCell className="py-5 font-medium">
-                {quote?.createdAt &&
-                  format(quote?.createdAt, "dd MM yyyy, hh:mm a")}
-              </TableCell>
+                  {quote?.pantoneColor}
+                </TableCell>
 
-              <TableCell className="py-5 font-medium">
-                <div className="flex-center-start gap-x-4">
-                  <div>
-                    <button
-                      onClick={() => {
-                        setShowApprovedQuoteModal(!showApprovedQuoteModal);
-                        setSelectedQuote(quote);
-                      }}
-                    >
-                      <EyeIcon size={20} color="#292929" />
-                    </button>
+                <TableCell className="w-max whitespace-nowrap py-5 font-medium">
+                  {quote?.createdAt &&
+                    format(quote?.createdAt, "dd-MM-yyyy, hh:mm a")}
+                </TableCell>
+
+                <TableCell className="w-max whitespace-nowrap py-5 font-medium">
+                  <div className="flex-center-start gap-x-4">
+                    <div>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setShowApprovedQuoteModal(!showApprovedQuoteModal);
+                          setSelectedQuote(quote);
+                        }}
+                        className="group gap-x-2"
+                      >
+                        View Details
+                        <AnimatedArrow />
+                      </Button>
+                    </div>
                   </div>
-
-                  {/* <button className="relative">
-                    <Badge className="flex-center absolute -right-3 -top-2 h-4 w-[1px] rounded-full bg-danger py-0 text-[10px]">
-                      5
-                    </Badge>
-                    <MessageSquareText size={20} color="#292929" />
-                  </button> */}
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
 

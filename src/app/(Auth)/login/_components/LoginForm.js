@@ -64,10 +64,7 @@ export default function LoginForm() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onLoginSubmit)}
-      className="text-primary-black lg:mx-auto lg:w-[75%]"
-    >
+    <form onSubmit={handleSubmit(onLoginSubmit)} className="text-primary-black">
       <div className="grid w-full items-center gap-2">
         <Label htmlFor="name" className="font-semibold">
           Email

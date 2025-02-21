@@ -56,7 +56,7 @@ function Container({ children, path, currentPathname }) {
             key={idx + new Date().toISOString()}
             className="inline-block"
           >
-            {l === " " ? " " : l}
+            {l === " " ? <span>&nbsp;</span> : l}
           </motion.span>
         ))}
       </motion.div>
@@ -80,7 +80,7 @@ function Container({ children, path, currentPathname }) {
             key={idx + new Date().toISOString()}
             className="inline-block"
           >
-            {l}
+            {l === " " ? <span>&nbsp;</span> : l}
           </motion.span>
         ))}
       </motion.div>

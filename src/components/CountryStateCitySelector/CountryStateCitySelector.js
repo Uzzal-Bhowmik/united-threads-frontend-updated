@@ -70,6 +70,7 @@ export default function CountryStateCitySelector({
       setValue("state", userAddress.state);
       setValue("city", userAddress.city);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userAddress?.country]);
 
   // if (!userAddress) {
@@ -256,7 +257,7 @@ export default function CountryStateCitySelector({
         <Input
           type="text"
           id="area"
-          placeholder="Type Area"
+          placeholder="Street Address"
           className="border border-primary-black bg-transparent text-primary-black outline-none focus:outline-none"
           {...register("area")}
         />
@@ -264,9 +265,9 @@ export default function CountryStateCitySelector({
 
       <div>
         <Input
-          type="text"
+          type="number"
           id="house"
-          placeholder="Type House No"
+          placeholder="Zip Code"
           className="border border-primary-black bg-transparent text-primary-black outline-none focus:outline-none"
           {...register("houseNo")}
         />

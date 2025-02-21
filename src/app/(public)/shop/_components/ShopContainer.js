@@ -24,11 +24,13 @@ const fadeUpVariants = {
   initial: {
     y: 10,
     opacity: 0,
+    filter: "blur(2px)",
   },
 
   animate: {
     y: 0,
     opacity: 1,
+    filter: "blur(0px)",
     transition: {
       stiffness: 190,
       damping: 35,
@@ -129,7 +131,7 @@ export default function ShopContainer() {
           variants={fadeUpVariants}
           initial="initial"
           animate="animate"
-          className="mt-6 grid grid-cols-1 md:grid-cols-2 md:gap-7 lg:grid-cols-3"
+          className="mt-6 grid grid-cols-1 gap-y-7 md:grid-cols-2 md:gap-7 2xl:grid-cols-3"
         >
           {products?.map((product) => (
             <motion.div variants={fadeUpVariants} key={product?._id}>

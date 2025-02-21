@@ -32,6 +32,7 @@ import {
 } from "@/utils/sessionStorage";
 import { errorToast } from "@/utils/customToast";
 import { sizeSorter } from "@/utils/sizeSorter";
+import pantoneToHex from "@/utils/pantoneToHex";
 
 export default function ProductDetailsContainer({ id }) {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -67,8 +68,6 @@ export default function ProductDetailsContainer({ id }) {
     router.push("/checkout");
   };
 
-  console.log(product);
-
   return (
     <div>
       {/* Breadcrumb */}
@@ -92,7 +91,10 @@ export default function ProductDetailsContainer({ id }) {
           {isProductLoading ? (
             <div className="h-[600px] animate-pulse rounded bg-gray-300"></div>
           ) : (
-            <ProductImgSlider images={product?.images} />
+            <ProductImgSlider
+              images={product?.images}
+              primaryImage={product?.primaryImage}
+            />
           )}
         </div>
 
@@ -139,9 +141,9 @@ export default function ProductDetailsContainer({ id }) {
               />
 
               {/* stock status */}
-              {product?.quantity > 0 ? (
+              {product?.stock > 0 ? (
                 <p className="font-medium text-success">
-                  In Stock ({product?.quantity})
+                  In Stock ({product?.stock})
                 </p>
               ) : (
                 <p className="font-medium text-danger">Out of Stock</p>
@@ -167,7 +169,7 @@ export default function ProductDetailsContainer({ id }) {
                       <Button
                         key={size}
                         className={cn(
-                          "hover:bg-foundation-orange-normal h-8 w-8 rounded-full font-semibold shadow md:h-9 md:w-9 lg:h-10 lg:w-10",
+                          "hover:bg-foundation-orange-normal h-8 w-8 rounded-full text-[10px] font-semibold shadow md:h-9 md:w-9 md:text-[13px] lg:h-10 lg:w-10",
                           selectedSize === size
                             ? "border-none bg-primary-black text-primary-white"
                             : "border border-black/50 bg-transparent text-black",
@@ -191,9 +193,9 @@ export default function ProductDetailsContainer({ id }) {
                     {product?.colorsPreferences?.map((clr) => (
                       <Button
                         key={clr}
-                        style={{ backgroundColor: `${clr}` }}
+                        style={{ backgroundColor: `${pantoneToHex(clr)}` }} // convert pantone to hex for bg color
                         className={cn(
-                          `h-8 w-8 rounded-full md:h-9 md:w-9 lg:h-10 lg:w-10`,
+                          `h-8 w-8 rounded-full md:h-10 md:w-10`,
                           selectedClr === clr
                             ? "border-4 border-yellow-600 p-2"
                             : "border-none p-0",
@@ -201,6 +203,7 @@ export default function ProductDetailsContainer({ id }) {
                         onClick={() => {
                           setSelectedClr(clr);
                         }}
+                        title={clr}
                       ></Button>
                     ))}
                   </div>

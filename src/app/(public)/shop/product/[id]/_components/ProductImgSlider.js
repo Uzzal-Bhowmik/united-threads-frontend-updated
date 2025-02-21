@@ -12,12 +12,13 @@ import {
 } from "yet-another-react-lightbox/plugins";
 // import { showImage } from "@/utils/fileHelper";
 
-export default function ProductImgSlider({ images }) {
+export default function ProductImgSlider({ images, primaryImage }) {
+  let imagesArr = [{ url: primaryImage, key: "primary-image" }, ...images];
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const [lightboxImageIndex, setlightboxImageIndex] = useState(-1); // Hide lightbox if index -1
 
   // Define image slides for lightbox
-  const imageSlides = images?.map((image) => {
+  const imageSlides = imagesArr?.map((image) => {
     return { ...image, src: image.url };
   });
 
@@ -26,7 +27,7 @@ export default function ProductImgSlider({ images }) {
       return (
         <div>
           <Image
-            src={images[i]?.url}
+            src={imagesArr[i]?.url}
             alt={`product image ${currentImgIndex}`}
             className="mx-auto block w-1/2 p-4"
             layout="fill"
@@ -52,7 +53,7 @@ export default function ProductImgSlider({ images }) {
   return (
     <>
       <Slider {...settings}>
-        {images?.map((img, index) => (
+        {imagesArr?.map((img, index) => (
           <div
             key={img.key}
             onClick={() => setCurrentImgIndex(index)}

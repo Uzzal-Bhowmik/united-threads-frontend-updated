@@ -13,13 +13,13 @@ export default function Stepper() {
   return (
     <div>
       {/* Step Dots */}
-      <div className="mx-auto flex w-1/2 items-center gap-x-5">
+      <div className="mx-auto flex w-full items-center gap-x-5 px-4 md:px-10 lg:w-1/2">
         {/* Step 1 */}
         <div className="flex flex-grow items-center gap-x-2 transition-all duration-300 ease-in-out">
           <div className="flex items-center gap-x-2">
             <div
               className={cn(
-                "flex h-10 w-10 items-center justify-center rounded-full",
+                "flex aspect-square h-10 w-10 items-center justify-center rounded-full",
                 currentStep === 1
                   ? "bg-primary-black text-white"
                   : "bg-green-600 text-white",
@@ -43,7 +43,7 @@ export default function Stepper() {
               "h-[1px] flex-grow",
               currentStep === 1 ? "bg-gray-600" : "bg-green-600",
             )}
-          ></div>
+          />
         </div>
 
         {/* Step 2 */}

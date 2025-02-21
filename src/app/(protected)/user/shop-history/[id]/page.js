@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function DynamicOrderPage({ params }) {
   return (
-    <div className="lg:mx-auto lg:w-3/4">
+    <div className="px-5 md:px-10 lg:mx-auto lg:w-[90%] lg:px-0 2xl:w-3/4">
       <OrderContainer orderId={params?.id} />
     </div>
   );
